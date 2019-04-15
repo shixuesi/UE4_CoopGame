@@ -28,6 +28,8 @@ protected:
 	void BeginCrouch();
 	void EndCrouch();
 
+	void BeginZoom();
+	void EndZoom();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UCameraComponent* CameraComp;
@@ -35,8 +37,18 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USpringArmComponent* SpringArmComp;
 
+	//是否需要视野变窄(开镜效果)
+	bool bWantsToZoom;
 
+	//窄视野
+	UPROPERTY(EditDefaultsOnly, Category = "Player")
+	float ZoomedFOV;
 
+	//默认视野
+	float DefaultFOV;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Player", meta = (ClampMin = 0.1,ClampMax = 100))
+	float ZoomInterpSpeed;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

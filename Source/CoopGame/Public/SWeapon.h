@@ -8,6 +8,7 @@
 
 class USkeletalMeshComponent;
 class UDamageType;
+class UParticleSystem;
 UCLASS()
 class COOPGAME_API ASWeapon : public AActor
 {
@@ -18,22 +19,33 @@ public:
 	ASWeapon();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category = "Components")
 	USkeletalMeshComponent* MeshComp;
 
 	UFUNCTION(BlueprintCallable,Category = "Weapon")
-	void Fire();
+	virtual void Fire();
 
-
+	//伤害类型
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
-		TSubclassOf<UDamageType> DamageType;
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	TSubclassOf<UDamageType> DamageType;
 
-	
+	//枪口插槽名字
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	FName MuzzleSocketName;
+
+	//枪口火焰特效
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	UParticleSystem* MuzzleEffect;
+
+	//击中特效
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	UParticleSystem* ImpactEffect;
+
+	//子弹轨迹特效
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	UParticleSystem* TracerEffect;
+public:	
+
 	
 };
