@@ -5,6 +5,8 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
+#include "../Public/SWeapon.h"
+#include "Engine/Engine.h"
 
 // Sets default values
 ASCharacter::ASCharacter()
@@ -33,6 +35,7 @@ void ASCharacter::BeginPlay()
 	
 	DefaultFOV = CameraComp->FieldOfView;
 	
+	GenWeapon(Weapon1);
 }
 
 void ASCharacter::MoveForward(float value)
@@ -66,6 +69,53 @@ void ASCharacter::EndZoom()
 	bWantsToZoom = false;
 }
 
+void ASCharacter::Fire()
+{
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->Fire();
+	}
+}
+
+
+void ASCharacter::SwitchWeapons(FKey Key)
+{
+	//FString KeyName = Key.ToString();
+	//UE_LOG(LogTemp, Log, TEXT("%s"), *KeyName);
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("%s"), *KeyName));
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->Destroy();
+	}
+	if (Key == EKeys::One)
+	{
+		GenWeapon(Weapon1);
+		return;
+	}
+
+	if (Key == EKeys::Two)
+	{
+		GenWeapon(Weapon2);
+		return;
+	}
+}
+
+void ASCharacter::GenWeapon(TSubclassOf<ASWeapon>& Weapon)
+{
+	if (Weapon)
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(Weapon, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+
+		if (CurrentWeapon)
+		{
+			CurrentWeapon->SetOwner(this);
+			CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, CurrentWeapon->CharaterAttachSockName);
+		}
+	}
+}
+
 // Called every frame
 void ASCharacter::Tick(float DeltaTime)
 {
@@ -92,6 +142,10 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 	PlayerInputComponent->BindAction("Zoom", IE_Pressed, this, &ASCharacter::BeginZoom);
 	PlayerInputComponent->BindAction("Zoom", IE_Released, this, &ASCharacter::EndZoom);
+
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ASCharacter::Fire);
+
+	PlayerInputComponent->BindAction("SwitchWeapons", IE_Pressed, this, &ASCharacter::SwitchWeapons);
 }
 
 FVector ASCharacter::GetPawnViewLocation() const

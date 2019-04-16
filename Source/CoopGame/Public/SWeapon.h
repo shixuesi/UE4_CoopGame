@@ -23,9 +23,6 @@ protected:
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category = "Components")
 	USkeletalMeshComponent* MeshComp;
 
-	UFUNCTION(BlueprintCallable,Category = "Weapon")
-	virtual void Fire();
-
 	//伤害类型
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	TSubclassOf<UDamageType> DamageType;
@@ -45,7 +42,16 @@ protected:
 	//子弹轨迹特效
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	UParticleSystem* TracerEffect;
+
+	void PlayFireEffects(const FVector& TracerPoint);
+
+	UPROPERTY(EditDefaultsOnly, Category = "CameraShake")
+	TSubclassOf<UCameraShake> FireCamerShake;
 public:	
 
-	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	FName CharaterAttachSockName;
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	virtual void Fire();
 };

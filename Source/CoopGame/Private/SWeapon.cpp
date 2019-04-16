@@ -57,20 +57,36 @@ void ASWeapon::Fire()
 		if(DebugWeaponDrawing > 0)
 			DrawDebugLine(GetWorld(), EyeLocation, TraceEndPoint, FColor::Red,false,1.0f,0,1.0f);
 
-		if (MuzzleEffect)
+		PlayFireEffects(TracerPoint);
+		
+	}
+}
+
+void ASWeapon::PlayFireEffects(const FVector& TracerPoint)
+{
+	if (MuzzleEffect)
+	{
+		UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, MeshComp, MuzzleSocketName);
+	}
+
+	FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
+
+	if (TracerEffect)
+	{
+		UParticleSystemComponent* TracerEffComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), TracerEffect, MuzzleLocation);
+		if (TracerEffComp)
 		{
-			UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, MeshComp, MuzzleSocketName);
+			//给轨迹粒子组件的Target赋值 确定终点
+			TracerEffComp->SetVectorParameter("Target", TracerPoint);
 		}
 
-		FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
-
-		if (TracerEffect)
+		APawn* Owner = Cast<APawn>(GetOwner());
+		if (Owner)
 		{
-			UParticleSystemComponent* TracerEffComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), TracerEffect, MuzzleLocation);
-			if (TracerEffComp)
+			APlayerController* PC = Cast<APlayerController>(Owner->GetController());
+			if (PC)
 			{
-				//给轨迹粒子组件的Target赋值 确定终点
-				TracerEffComp->SetVectorParameter("Target", TracerPoint);
+				PC->ClientPlayCameraShake(FireCamerShake);
 			}
 		}
 	}
