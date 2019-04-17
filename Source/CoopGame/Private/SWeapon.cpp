@@ -6,6 +6,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "PhysicalMaterials/PhysicalMaterial.h"
+#include "CoopGame.h"
 
 static int32 DebugWeaponDrawing = 0;
 FAutoConsoleVariableRef CVARDebugWeaponDrawing(TEXT("COOP.DebugWeapons"), DebugWeaponDrawing, TEXT("Draw Debug Lines for Weapons"), ECVF_Cheat);
@@ -15,6 +17,7 @@ ASWeapon::ASWeapon()
 	MeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MeshComp"));
 	RootComponent = MeshComp;
 	MuzzleSocketName = "MuzzleSocket";
+	BaseDamage = 20.0f;
 }
 
 void ASWeapon::Fire()
@@ -29,7 +32,7 @@ void ASWeapon::Fire()
 		MyOwner->GetActorEyesViewPoint(EyeLocation, EyeRotation);
 
 		FVector ShootDir = EyeRotation.Vector();
-		FVector TraceEndPoint = EyeLocation + ShootDir * 1000;
+		FVector TraceEndPoint = EyeLocation + ShootDir * 100000;
 
 		//子弹轨迹例子的终点
 		FVector TracerPoint = TraceEndPoint;
@@ -37,23 +40,45 @@ void ASWeapon::Fire()
 		FCollisionQueryParams QueryParams;
 		QueryParams.AddIgnoredActor(MyOwner);
 		QueryParams.AddIgnoredActor(this);
+		QueryParams.bReturnPhysicalMaterial = true;
 		QueryParams.bTraceComplex = true;
 
 		FHitResult Hit;
-		if (GetWorld()->LineTraceSingleByChannel(Hit, EyeLocation, TraceEndPoint,ECC_Visibility, QueryParams))
+		if (GetWorld()->LineTraceSingleByChannel(Hit, EyeLocation, TraceEndPoint, WEAPONCOLLISIONCHANNEL, QueryParams))
 		{
 			//射中物体
 			AActor* HitActor = Hit.GetActor();
 
 			TracerPoint = Hit.ImpactPoint;
-			UGameplayStatics::ApplyPointDamage(HitActor, 20.0f, ShootDir, Hit, MyOwner->GetInstigatorController(), this, DamageType);
 
-			if (ImpactEffect)
+			EPhysicalSurface SurfaceType = UPhysicalMaterial::DetermineSurfaceType(Hit.PhysMaterial.Get());
+			float Damage = BaseDamage;
+			if (SurfaceType == SURFACE_FLESHVULNERABLE)
 			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
+				Damage *= 4.0f;
+			}
+			UGameplayStatics::ApplyPointDamage(HitActor, Damage, ShootDir, Hit, MyOwner->GetInstigatorController(), this, DamageType);
+
+			UParticleSystem* SelectedEffect = nullptr;
+			switch (SurfaceType)
+			{
+			case SURFACE_FLESHDEFAULG:
+				SelectedEffect = FleshImpactEffect; 
+				break;
+			case SURFACE_FLESHVULNERABLE:
+				SelectedEffect = FleshImpactEffect; 
+				break;
+			default:
+				SelectedEffect = DefaultImpactEffect;
+				break;
+			}
+
+			if (SelectedEffect)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), SelectedEffect, Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
 			}
 		}
-
+		
 		if(DebugWeaponDrawing > 0)
 			DrawDebugLine(GetWorld(), EyeLocation, TraceEndPoint, FColor::Red,false,1.0f,0,1.0f);
 
