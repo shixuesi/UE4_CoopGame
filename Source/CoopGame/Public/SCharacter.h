@@ -31,7 +31,7 @@ protected:
 	void BeginZoom();
 	void EndZoom();
 
-	void Fire();
+	//void Fire();
 
 	void SwitchWeapons(FKey Key);
 
@@ -64,6 +64,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Player", meta = (ClampMin = 0.1,ClampMax = 100))
 	float ZoomInterpSpeed;
+
+	void StartFire();
+	void StopFire();
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

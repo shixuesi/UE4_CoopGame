@@ -54,11 +54,25 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 	float BaseDamage;
+
+	
+
+	FTimerHandle TimerHandle_TimeBetweenShots;
+
+	float LastFireTime;
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+		virtual void Fire();
 public:	
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	FName CharaterAttachSockName;
 
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	virtual void Fire();
+	
+
+	virtual void StartFire();
+
+	virtual void StopFire();
+
+	
 };

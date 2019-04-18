@@ -28,3 +28,13 @@ void ASProjectileWeapon::Fire()
 
 	}
 }
+
+void ASProjectileWeapon::StartFire()
+{
+	Fire();
+}
+
+void ASProjectileWeapon::StopFire()
+{
+
+}

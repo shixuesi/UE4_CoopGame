@@ -69,13 +69,13 @@ void ASCharacter::EndZoom()
 	bWantsToZoom = false;
 }
 
-void ASCharacter::Fire()
-{
-	if (CurrentWeapon)
-	{
-		CurrentWeapon->Fire();
-	}
-}
+//void ASCharacter::Fire()
+//{
+//	if (CurrentWeapon)
+//	{
+//		CurrentWeapon->Fire();
+//	}
+//}
 
 
 void ASCharacter::SwitchWeapons(FKey Key)
@@ -116,6 +116,22 @@ void ASCharacter::GenWeapon(TSubclassOf<ASWeapon>& Weapon)
 	}
 }
 
+void ASCharacter::StartFire()
+{
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->StartFire();
+	}
+}
+
+void ASCharacter::StopFire()
+{
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->StopFire();
+	}
+}
+
 // Called every frame
 void ASCharacter::Tick(float DeltaTime)
 {
@@ -143,7 +159,8 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("Zoom", IE_Pressed, this, &ASCharacter::BeginZoom);
 	PlayerInputComponent->BindAction("Zoom", IE_Released, this, &ASCharacter::EndZoom);
 
-	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ASCharacter::Fire);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ASCharacter::StartFire);
+	PlayerInputComponent->BindAction("Fire", IE_Released, this, &ASCharacter::StopFire);
 
 	PlayerInputComponent->BindAction("SwitchWeapons", IE_Pressed, this, &ASCharacter::SwitchWeapons);
 }

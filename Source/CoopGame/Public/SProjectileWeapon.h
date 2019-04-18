@@ -22,4 +22,8 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly,Category = "Weapon")
 	TSubclassOf<AActor> ProjectileClass;
+
+
+	virtual void StartFire() override ;
+	virtual void StopFire() override;
 };
